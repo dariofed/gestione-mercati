@@ -315,6 +315,7 @@ const HistoryPage = () => {
   const filteredSales = getFilteredSales();
   const totals = calculateTotals(filteredSales);
   const monthlyStats = getMonthlyStats(filteredSales);
+  const groupedMarkets = groupSalesByMarket(filteredSales);
 
   if (loading) {
     return (
