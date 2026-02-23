@@ -101,6 +101,59 @@ const HistoryPage = () => {
     return Object.values(monthlyData).sort((a, b) => b.month.localeCompare(a.month));
   };
 
+  // Raggruppa vendite per mercato (stesso nome + stessa data)
+  const groupSalesByMarket = (salesList) => {
+    const grouped = {};
+    
+    salesList.forEach(sale => {
+      const key = `${sale.date}_${sale.marketName}`;
+      
+      if (!grouped[key]) {
+        grouped[key] = {
+          marketKey: key,
+          date: sale.date,
+          marketName: sale.marketName,
+          sales: [],
+          totalRevenue: 0,
+          totalCost: 0,
+          totalProfit: 0
+        };
+      }
+      
+      grouped[key].sales.push(sale);
+      grouped[key].totalRevenue += sale.totalRevenue;
+      grouped[key].totalCost += sale.totalCost;
+      grouped[key].totalProfit += sale.profit;
+    });
+
+    return Object.values(grouped).sort((a, b) => 
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+  };
+
+  const toggleMarketExpansion = (marketKey) => {
+    setExpandedMarkets(prev => ({
+      ...prev,
+      [marketKey]: !prev[marketKey]
+    }));
+  };
+
+  const handleEditSale = (sale) => {
+    setEditingSale(sale);
+  };
+
+  const handleSaveEdit = async (updatedSale) => {
+    try {
+      await updateSale(updatedSale);
+      toast.success('Vendita aggiornata con successo');
+      setEditingSale(null);
+      loadData();
+    } catch (error) {
+      console.error('Errore aggiornamento vendita:', error);
+      toast.error('Errore nell\'aggiornamento della vendita');
+    }
+  };
+
   const handleDeleteSale = async (saleId) => {
     if (!window.confirm('Sei sicuro di voler eliminare questa vendita?')) {
       return;
@@ -113,6 +166,23 @@ const HistoryPage = () => {
     } catch (error) {
       console.error('Errore eliminazione vendita:', error);
       toast.error('Errore nell\'eliminazione della vendita');
+    }
+  };
+
+  const handleDeleteMarket = async (marketGroup) => {
+    if (!window.confirm(`Sei sicuro di voler eliminare tutte le ${marketGroup.sales.length} vendite di ${marketGroup.marketName}?`)) {
+      return;
+    }
+
+    try {
+      for (const sale of marketGroup.sales) {
+        await deleteSale(sale.id);
+      }
+      toast.success(`Eliminate ${marketGroup.sales.length} vendite`);
+      loadData();
+    } catch (error) {
+      console.error('Errore eliminazione mercato:', error);
+      toast.error('Errore nell\'eliminazione del mercato');
     }
   };
 
