@@ -15,6 +15,8 @@ const HistoryPage = () => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [loading, setLoading] = useState(true);
+  const [editingSale, setEditingSale] = useState(null);
+  const [expandedMarkets, setExpandedMarkets] = useState({});
 
   useEffect(() => {
     loadData();
