@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Plus, Minus, Check, Calendar, MapPin } from 'lucide-react';
-import { getAllProducts, addSale } from '@/utils/db';
+import { getAllProducts, addSale, getAllSales } from '@/utils/db';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 import { format } from 'date-fns';
@@ -10,13 +10,37 @@ const SalesPage = () => {
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState({});
   const [marketCost, setMarketCost] = useState(0);
-  const [marketName, setMarketName] = useState('');
-  const [saleDate, setSaleDate] = useState(new Date().toISOString().split('T')[0]);
+  const [marketName, setMarketName] = useState(() => {
+    return localStorage.getItem('lastMarketName') || '';
+  });
+  const [saleDate, setSaleDate] = useState(() => {
+    return localStorage.getItem('lastSaleDate') || new Date().toISOString().split('T')[0];
+  });
+  const [suggestedMarkets, setSuggestedMarkets] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadProducts();
   }, []);
+
+  useEffect(() => {
+    // When date changes, find markets already done on that date
+    findMarketsForDate(saleDate);
+  }, [saleDate]);
+
+  const findMarketsForDate = async (date) => {
+    try {
+      const allSales = await getAllSales();
+      const marketsOnDate = allSales
+        .filter(sale => sale.date === date)
+        .map(sale => sale.marketName)
+        .filter((name, index, self) => name && self.indexOf(name) === index); // unique
+      
+      setSuggestedMarkets(marketsOnDate);
+    } catch (error) {
+      console.error('Errore ricerca mercati:', error);
+    }
+  };
 
   const loadProducts = async () => {
     try {
@@ -73,13 +97,24 @@ const SalesPage = () => {
   const handleCompleteSale = async () => {
     const items = Object.entries(cart)
       .filter(([_, quantity]) => quantity > 0)
-      .map(([productId, quantity]) => ({
-        productId,
-        quantity
-      }));
+      .map(([productId, quantity]) => {
+        const product = products.find(p => p.id === productId);
+        return {
+          productId,
+          productName: product.name,
+          quantity,
+          priceAtSale: product.price,  // Salva il prezzo al momento della vendita
+          costAtSale: product.cost      // Salva il costo al momento della vendita
+        };
+      });
 
     if (items.length === 0) {
       toast.error('Aggiungi almeno un prodotto alla vendita');
+      return;
+    }
+
+    if (!marketName.trim()) {
+      toast.error('Inserisci il nome del mercato');
       return;
     }
 
@@ -89,7 +124,7 @@ const SalesPage = () => {
       id: uuidv4(),
       date: saleDate,
       timestamp: new Date(saleDate + 'T' + new Date().toTimeString().split(' ')[0]).toISOString(),
-      marketName: marketName || 'Mercato',
+      marketName: marketName.trim(),
       items,
       marketCost,
       totalRevenue,
@@ -99,23 +134,36 @@ const SalesPage = () => {
 
     try {
       await addSale(sale);
+      
+      // Salva data e nome mercato in localStorage per persistenza
+      localStorage.setItem('lastMarketName', marketName.trim());
+      localStorage.setItem('lastSaleDate', saleDate);
+      
       toast.success('Vendita registrata con successo!', {
         description: `${format(new Date(saleDate), 'dd/MM/yyyy', { locale: it })} | Profitto: €${profit.toFixed(2)}`
       });
       
-      // Reset cart
+      // Reset solo il carrello e costo mercato, mantieni data e nome
       const resetCart = {};
       products.forEach(product => {
         resetCart[product.id] = 0;
       });
       setCart(resetCart);
       setMarketCost(0);
-      setMarketName('');
-      setSaleDate(new Date().toISOString().split('T')[0]);
     } catch (error) {
       console.error('Errore salvataggio vendita:', error);
       toast.error('Errore nel salvataggio della vendita');
     }
+  };
+
+  const handleDateChange = (newDate) => {
+    setSaleDate(newDate);
+    localStorage.setItem('lastSaleDate', newDate);
+  };
+
+  const handleMarketNameChange = (newName) => {
+    setMarketName(newName);
+    localStorage.setItem('lastMarketName', newName);
   };
 
   const { totalRevenue, profit } = calculateTotals();
@@ -171,7 +219,7 @@ const SalesPage = () => {
               type="date"
               data-testid="sale-date-input"
               value={saleDate}
-              onChange={(e) => setSaleDate(e.target.value)}
+              onChange={(e) => handleDateChange(e.target.value)}
               className="w-full px-4 py-3 border-2 border-stone-900 rounded-xl text-base font-medium focus:outline-none focus:ring-2 focus:ring-stone-900"
             />
           </div>
@@ -180,16 +228,55 @@ const SalesPage = () => {
               <MapPin size={20} className="text-stone-900" />
               <span className="text-lg font-bold text-stone-900">Nome Mercato</span>
             </label>
-            <input
-              type="text"
-              data-testid="market-name-input"
-              value={marketName}
-              onChange={(e) => setMarketName(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-stone-900 rounded-xl text-base font-medium focus:outline-none focus:ring-2 focus:ring-stone-900"
-              placeholder="Es. Mercato Porta Palazzo"
-            />
+            {suggestedMarkets.length > 0 ? (
+              <select
+                data-testid="market-name-select"
+                value={marketName}
+                onChange={(e) => handleMarketNameChange(e.target.value)}
+                className="w-full px-4 py-3 border-2 border-stone-900 rounded-xl text-base font-medium focus:outline-none focus:ring-2 focus:ring-stone-900"
+              >
+                <option value="">Seleziona o scrivi nuovo...</option>
+                {suggestedMarkets.map((name, idx) => (
+                  <option key={idx} value={name}>{name}</option>
+                ))}
+              </select>
+            ) : (
+              <input
+                type="text"
+                data-testid="market-name-input"
+                value={marketName}
+                onChange={(e) => handleMarketNameChange(e.target.value)}
+                className="w-full px-4 py-3 border-2 border-stone-900 rounded-xl text-base font-medium focus:outline-none focus:ring-2 focus:ring-stone-900"
+                placeholder="Es. Mercato Porta Palazzo"
+              />
+            )}
+            {suggestedMarkets.length > 0 && (
+              <p className="text-xs text-stone-500 mt-1">
+                Mercato già fatto in questa data. Puoi anche scrivere un nome nuovo.
+              </p>
+            )}
           </div>
         </div>
+        {suggestedMarkets.length > 0 && (
+          <div className="mt-4">
+            <button
+              onClick={() => handleMarketNameChange('')}
+              className="text-sm text-stone-600 hover:text-stone-900 underline"
+            >
+              Oppure scrivi un nuovo nome mercato
+            </button>
+            {marketName === '' && (
+              <input
+                type="text"
+                data-testid="market-name-input"
+                value={marketName}
+                onChange={(e) => handleMarketNameChange(e.target.value)}
+                className="w-full mt-2 px-4 py-3 border-2 border-stone-900 rounded-xl text-base font-medium focus:outline-none focus:ring-2 focus:ring-stone-900"
+                placeholder="Es. Mercato Nuovo"
+              />
+            )}
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
@@ -241,7 +328,7 @@ const SalesPage = () => {
       <div className="bg-white border-2 border-stone-900 rounded-2xl p-6 mb-6">
         <label className="block mb-2">
           <span className="text-lg font-bold text-stone-900">Costo Mercato (€)</span>
-          <p className="text-sm text-stone-600 mb-2">Costo totale del mercato di oggi</p>
+          <p className="text-sm text-stone-600 mb-2">Costo totale del mercato (affitto banco, trasporto, ecc.)</p>
           <input
             type="number"
             data-testid="market-cost-input"
