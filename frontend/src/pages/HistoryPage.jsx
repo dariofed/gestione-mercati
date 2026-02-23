@@ -489,95 +489,170 @@ const HistoryPage = () => {
         <span>Scarica PDF</span>
       </button>
 
-      {/* Sales list */}
+      {/* Sales list - Grouped by Market */}
       {filteredSales.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-lg font-medium text-stone-600">Nessuna vendita trovata</p>
         </div>
       ) : (
         <div className="space-y-4">
-          {filteredSales.map(sale => (
-            <div
-              key={sale.id}
-              data-testid={`sale-item-${sale.id}`}
-              className="bg-white border-2 border-stone-900 rounded-2xl p-6 receipt-border"
-            >
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <p className="text-sm font-bold uppercase tracking-widest opacity-60 text-stone-700">
-                    {format(new Date(sale.date), 'EEEE, dd MMMM yyyy', { locale: it })}
-                  </p>
-                  <p className="text-sm font-medium text-stone-600">
-                    {sale.marketName || 'Mercato'}
-                  </p>
-                  <p className="text-xs text-stone-500">
-                    {format(new Date(sale.timestamp), 'HH:mm', { locale: it })}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    data-testid={`delete-sale-${sale.id}`}
-                    onClick={() => handleDeleteSale(sale.id)}
-                    className="p-2 rounded-lg border-2 border-stone-900 bg-red-100 hover:bg-red-200 neo-button"
-                  >
-                    <Trash2 size={18} className="text-stone-900" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="space-y-2 mb-4">
-                {sale.items.map((item, idx) => {
-                  const product = products.find(p => p.id === item.productId);
-                  return (
-                    <div key={idx} className="flex justify-between text-sm">
-                      <span className="font-medium text-stone-700">
-                        {product?.name || 'Prodotto'} x{item.quantity}
-                      </span>
-                      <span className="font-bold text-stone-900">
-                        €{((product?.price || 0) * item.quantity).toFixed(2)}
-                      </span>
+          {groupedMarkets.map(marketGroup => {
+            const isExpanded = expandedMarkets[marketGroup.marketKey];
+            
+            return (
+              <div
+                key={marketGroup.marketKey}
+                data-testid={`market-group-${marketGroup.marketKey}`}
+                className="bg-white border-2 border-stone-900 rounded-2xl overflow-hidden"
+              >
+                {/* Market Header - Collapsible */}
+                <div
+                  className="p-6 cursor-pointer hover:bg-stone-50"
+                  onClick={() => toggleMarketExpansion(marketGroup.marketKey)}
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        {isExpanded ? (
+                          <ChevronUp size={24} className="text-stone-900" />
+                        ) : (
+                          <ChevronDown size={24} className="text-stone-900" />
+                        )}
+                        <h3 className="text-2xl font-extrabold text-stone-900">
+                          {marketGroup.marketName}
+                        </h3>
+                      </div>
+                      <p className="text-sm font-bold uppercase tracking-widest opacity-60 text-stone-700">
+                        {format(new Date(marketGroup.date), 'EEEE, dd MMMM yyyy', { locale: it })}
+                      </p>
+                      <p className="text-sm text-stone-600 mt-1">
+                        {marketGroup.sales.length} {marketGroup.sales.length === 1 ? 'vendita' : 'vendite'}
+                      </p>
                     </div>
-                  );
-                })}
-                {sale.marketCost > 0 && (
-                  <div className="flex justify-between text-sm border-t pt-2">
-                    <span className="font-medium text-stone-700">Costo Mercato</span>
-                    <span className="font-bold text-red-600">-€{sale.marketCost.toFixed(2)}</span>
+
+                    <div className="text-right">
+                      <p className="text-sm font-bold uppercase tracking-widest opacity-60 text-stone-700 mb-1">
+                        Profitto Totale
+                      </p>
+                      <p className={`text-3xl font-extrabold ${
+                        marketGroup.totalProfit >= 0 ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        €{marketGroup.totalProfit.toFixed(2)}
+                      </p>
+                      <div className="flex gap-4 mt-2 text-xs">
+                        <span className="text-stone-600">
+                          Incasso: <strong>€{marketGroup.totalRevenue.toFixed(2)}</strong>
+                        </span>
+                        <span className="text-stone-600">
+                          Costi: <strong>€{marketGroup.totalCost.toFixed(2)}</strong>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Expanded Sales Details */}
+                {isExpanded && (
+                  <div className="border-t-2 border-stone-900 bg-stone-50">
+                    <div className="p-4 space-y-3">
+                      {marketGroup.sales.map((sale, idx) => (
+                        <div
+                          key={sale.id}
+                          data-testid={`sale-item-${sale.id}`}
+                          className="bg-white border-2 border-stone-900 rounded-xl p-4"
+                        >
+                          <div className="flex justify-between items-start mb-3">
+                            <div>
+                              <p className="text-xs text-stone-500">
+                                Vendita #{idx + 1} - {format(new Date(sale.timestamp), 'HH:mm', { locale: it })}
+                              </p>
+                            </div>
+                            <div className="flex gap-2">
+                              <button
+                                data-testid={`edit-sale-${sale.id}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEditSale(sale);
+                                }}
+                                className="p-2 rounded-lg border-2 border-stone-900 bg-blue-100 hover:bg-blue-200 neo-button\"
+                                style={{ backgroundColor: '#BAE6FD' }}
+                              >
+                                <Edit2 size={16} className="text-stone-900" />
+                              </button>
+                              <button
+                                data-testid={`delete-sale-${sale.id}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteSale(sale.id);
+                                }}
+                                className="p-2 rounded-lg border-2 border-stone-900 bg-red-100 hover:bg-red-200 neo-button"
+                                style={{ backgroundColor: '#FDA4AF' }}
+                              >
+                                <Trash2 size={16} className="text-stone-900" />
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="space-y-1 mb-3">
+                            {sale.items.map((item, itemIdx) => (
+                              <div key={itemIdx} className="flex justify-between text-sm">
+                                <span className="font-medium text-stone-700">
+                                  {item.productName} x{item.quantity}
+                                </span>
+                                <span className="font-bold text-stone-900">
+                                  €{(item.priceAtSale * item.quantity).toFixed(2)}
+                                </span>
+                              </div>
+                            ))}
+                            {sale.marketCost > 0 && (
+                              <div className="flex justify-between text-sm border-t pt-1">
+                                <span className="font-medium text-stone-700">Costo Mercato</span>
+                                <span className="font-bold text-red-600">-€{sale.marketCost.toFixed(2)}</span>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="border-t border-stone-200 pt-2 flex justify-between text-sm">
+                            <span className="font-bold text-stone-700">Profitto:</span>
+                            <span className={`font-extrabold ${
+                              sale.profit >= 0 ? 'text-green-600' : 'text-red-600'
+                            }`}>
+                              €{sale.profit.toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Market Group Actions */}
+                    <div className="border-t-2 border-stone-900 p-4 bg-white flex justify-end gap-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteMarket(marketGroup);
+                        }}
+                        className="px-4 py-2 bg-red-100 text-stone-900 rounded-lg border-2 border-stone-900 font-bold neo-button flex items-center gap-2"
+                        style={{ backgroundColor: '#FDA4AF' }}
+                      >
+                        <Trash2 size={16} />
+                        <span>Elimina Mercato</span>
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
-
-              <div className="border-t-2 border-dashed border-stone-300 pt-4 space-y-1">
-                <div className="flex justify-between">
-                  <span className="text-sm font-bold uppercase tracking-widest opacity-60 text-stone-700">
-                    Incasso
-                  </span>
-                  <span className="text-lg font-bold text-stone-900">
-                    €{sale.totalRevenue.toFixed(2)}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm font-bold uppercase tracking-widest opacity-60 text-stone-700">
-                    Costi
-                  </span>
-                  <span className="text-lg font-bold text-stone-900">
-                    €{sale.totalCost.toFixed(2)}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm font-bold uppercase tracking-widest opacity-60 text-stone-700">
-                    Profitto
-                  </span>
-                  <span className={`text-xl font-extrabold ${
-                    sale.profit >= 0 ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    €{sale.profit.toFixed(2)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
+      )}
+
+      {/* Edit Modal */}
+      {editingSale && (
+        <EditSaleModal
+          sale={editingSale}
+          onClose={() => setEditingSale(null)}
+          onSave={handleSaveEdit}
+        />
       )}
     </div>
   );
