@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from '@/components/ui/sonner';
+import { DBProvider } from '@/contexts/DBContext';
 import SalesPage from '@/pages/SalesPage';
 import HistoryPage from '@/pages/HistoryPage';
 import SettingsPage from '@/pages/SettingsPage';
@@ -8,19 +9,21 @@ import '@/App.css';
 
 function App() {
   return (
-    <div className="App">
-      <BrowserRouter>
-        <div className="min-h-screen" style={{ backgroundColor: '#FDFBF7' }}>
-          <Navigation />
-          <Routes>
-            <Route path="/" element={<SalesPage />} />
-            <Route path="/history" element={<HistoryPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-          </Routes>
-        </div>
-      </BrowserRouter>
-      <Toaster position="top-center" />
-    </div>
+    <DBProvider>
+      <div className="App">
+        <BrowserRouter>
+          <div className="min-h-screen" style={{ backgroundColor: '#FDFBF7' }}>
+            <Navigation />
+            <Routes>
+              <Route path="/" element={<SalesPage />} />
+              <Route path="/history" element={<HistoryPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+            </Routes>
+          </div>
+        </BrowserRouter>
+        <Toaster position="top-center" />
+      </div>
+    </DBProvider>
   );
 }
 
