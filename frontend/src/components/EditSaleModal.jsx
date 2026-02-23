@@ -74,10 +74,10 @@ const EditSaleModal = ({ sale, onClose, onSave }) => {
   const totals = calculateTotals();
 
   return (
-    <div className=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4\">
-      <div className=\"bg-white rounded-2xl border-2 border-stone-900 max-w-2xl w-full max-h-[90vh] overflow-y-auto\">
-        <div className=\"sticky top-0 bg-white border-b-2 border-stone-900 p-6 flex justify-between items-center\">
-          <h2 className=\"text-2xl font-extrabold text-stone-900\">Modifica Vendita</h2>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl border-2 border-stone-900 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b-2 border-stone-900 p-6 flex justify-between items-center">
+          <h2 className="text-2xl font-extrabold text-stone-900">Modifica Vendita</h2>
           <button
             onClick={onClose}
             data-testid=\"close-edit-modal\"
