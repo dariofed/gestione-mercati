@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
-import { Plus, Minus, Check } from 'lucide-react';
+import { Plus, Minus, Check, Calendar, MapPin } from 'lucide-react';
 import { getAllProducts, addSale } from '@/utils/db';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
+import { format } from 'date-fns';
+import { it } from 'date-fns/locale';
 
 const SalesPage = () => {
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState({});
   const [marketCost, setMarketCost] = useState(0);
+  const [marketName, setMarketName] = useState('');
+  const [saleDate, setSaleDate] = useState(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,7 +23,6 @@ const SalesPage = () => {
       const allProducts = await getAllProducts();
       setProducts(allProducts);
       
-      // Initialize cart with zero quantities
       const initialCart = {};
       allProducts.forEach(product => {
         initialCart[product.id] = 0;
@@ -84,8 +87,9 @@ const SalesPage = () => {
 
     const sale = {
       id: uuidv4(),
-      date: new Date().toISOString().split('T')[0],
-      timestamp: new Date().toISOString(),
+      date: saleDate,
+      timestamp: new Date(saleDate + 'T' + new Date().toTimeString().split(' ')[0]).toISOString(),
+      marketName: marketName || 'Mercato',
       items,
       marketCost,
       totalRevenue,
@@ -96,7 +100,7 @@ const SalesPage = () => {
     try {
       await addSale(sale);
       toast.success('Vendita registrata con successo!', {
-        description: `Incasso: €${totalRevenue.toFixed(2)} | Profitto: €${profit.toFixed(2)}`
+        description: `${format(new Date(saleDate), 'dd/MM/yyyy', { locale: it })} | Profitto: €${profit.toFixed(2)}`
       });
       
       // Reset cart
@@ -106,6 +110,8 @@ const SalesPage = () => {
       });
       setCart(resetCart);
       setMarketCost(0);
+      setMarketName('');
+      setSaleDate(new Date().toISOString().split('T')[0]);
     } catch (error) {
       console.error('Errore salvataggio vendita:', error);
       toast.error('Errore nel salvataggio della vendita');
@@ -151,6 +157,39 @@ const SalesPage = () => {
         <p className="text-base md:text-lg font-medium text-stone-600">
           Aggiungi prodotti e completa la vendita
         </p>
+      </div>
+
+      {/* Date and Market Name */}
+      <div className="bg-white border-2 border-stone-900 rounded-2xl p-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="flex items-center gap-2 mb-2">
+              <Calendar size={20} className="text-stone-900" />
+              <span className="text-lg font-bold text-stone-900">Data Vendita</span>
+            </label>
+            <input
+              type="date"
+              data-testid="sale-date-input"
+              value={saleDate}
+              onChange={(e) => setSaleDate(e.target.value)}
+              className="w-full px-4 py-3 border-2 border-stone-900 rounded-xl text-base font-medium focus:outline-none focus:ring-2 focus:ring-stone-900"
+            />
+          </div>
+          <div>
+            <label className="flex items-center gap-2 mb-2">
+              <MapPin size={20} className="text-stone-900" />
+              <span className="text-lg font-bold text-stone-900">Nome Mercato</span>
+            </label>
+            <input
+              type="text"
+              data-testid="market-name-input"
+              value={marketName}
+              onChange={(e) => setMarketName(e.target.value)}
+              className="w-full px-4 py-3 border-2 border-stone-900 rounded-xl text-base font-medium focus:outline-none focus:ring-2 focus:ring-stone-900"
+              placeholder="Es. Mercato Porta Palazzo"
+            />
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
@@ -216,7 +255,7 @@ const SalesPage = () => {
       </div>
 
       {/* Fixed bottom bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-stone-900 p-4 shadow-lg">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-stone-900 p-4 shadow-lg z-50">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-3">
             <div>

@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { getAllSales, getAllProducts, updateSale, deleteSale } from '@/utils/db';
-import { Download, Edit2, Trash2, Calendar } from 'lucide-react';
+import { Download, Edit2, Trash2, Calendar, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
-import { format, startOfYear, endOfYear } from 'date-fns';
+import { format, startOfYear, endOfYear, startOfMonth, endOfMonth, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 const HistoryPage = () => {
   const [sales, setSales] = useState([]);
@@ -13,7 +13,6 @@ const HistoryPage = () => {
   const [filterType, setFilterType] = useState('all');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [editingSale, setEditingSale] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -74,6 +73,31 @@ const HistoryPage = () => {
     return totals;
   };
 
+  const getMonthlyStats = (salesList) => {
+    const monthlyData = {};
+    
+    salesList.forEach(sale => {
+      const monthKey = format(new Date(sale.date), 'yyyy-MM');
+      
+      if (!monthlyData[monthKey]) {
+        monthlyData[monthKey] = {
+          month: format(new Date(sale.date), 'MMMM yyyy', { locale: it }),
+          revenue: 0,
+          cost: 0,
+          profit: 0,
+          salesCount: 0
+        };
+      }
+      
+      monthlyData[monthKey].revenue += sale.totalRevenue;
+      monthlyData[monthKey].cost += sale.totalCost;
+      monthlyData[monthKey].profit += sale.profit;
+      monthlyData[monthKey].salesCount += 1;
+    });
+
+    return Object.values(monthlyData).sort((a, b) => b.month.localeCompare(a.month));
+  };
+
   const handleDeleteSale = async (saleId) => {
     if (!window.confirm('Sei sicuro di voler eliminare questa vendita?')) {
       return;
@@ -97,81 +121,127 @@ const HistoryPage = () => {
       return;
     }
 
-    const doc = new jsPDF();
-    const totals = calculateTotals(filteredSales);
+    try {
+      const doc = new jsPDF();
+      const totals = calculateTotals(filteredSales);
+      const monthlyStats = getMonthlyStats(filteredSales);
 
-    // Title
-    doc.setFontSize(20);
-    doc.setFont(undefined, 'bold');
-    doc.text('Report Vendite Artigianato', 14, 20);
+      // Title
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Report Vendite Artigianato', 14, 20);
 
-    // Period
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'normal');
-    let periodText = '';
-    if (filterType === 'year') {
-      periodText = `Anno: ${new Date().getFullYear()}`;
-    } else if (filterType === 'custom' && startDate && endDate) {
-      periodText = `Periodo: ${format(new Date(startDate), 'dd/MM/yyyy', { locale: it })} - ${format(new Date(endDate), 'dd/MM/yyyy', { locale: it })}`;
-    } else {
-      periodText = 'Tutte le vendite';
-    }
-    doc.text(periodText, 14, 28);
-    doc.text(`Generato il: ${format(new Date(), 'dd/MM/yyyy HH:mm', { locale: it })}`, 14, 34);
-
-    // Sales table
-    const tableData = filteredSales.map(sale => {
-      const itemsText = sale.items.map(item => {
-        const product = products.find(p => p.id === item.productId);
-        return `${product?.name || 'Prodotto'} x${item.quantity}`;
-      }).join(', ');
-
-      return [
-        format(new Date(sale.date), 'dd/MM/yyyy', { locale: it }),
-        itemsText,
-        `€${sale.totalRevenue.toFixed(2)}`,
-        `€${sale.totalCost.toFixed(2)}`,
-        `€${sale.profit.toFixed(2)}`
-      ];
-    });
-
-    doc.autoTable({
-      startY: 40,
-      head: [['Data', 'Prodotti', 'Incasso', 'Costi', 'Profitto']],
-      body: tableData,
-      theme: 'striped',
-      headStyles: { fillColor: [28, 25, 23], textColor: [255, 255, 255] },
-      styles: { fontSize: 9 },
-      columnStyles: {
-        0: { cellWidth: 25 },
-        1: { cellWidth: 70 },
-        2: { cellWidth: 25, halign: 'right' },
-        3: { cellWidth: 25, halign: 'right' },
-        4: { cellWidth: 25, halign: 'right' }
+      // Period
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      let periodText = '';
+      if (filterType === 'year') {
+        periodText = `Anno: ${new Date().getFullYear()}`;
+      } else if (filterType === 'custom' && startDate && endDate) {
+        periodText = `Periodo: ${format(new Date(startDate), 'dd/MM/yyyy', { locale: it })} - ${format(new Date(endDate), 'dd/MM/yyyy', { locale: it })}`;
+      } else {
+        periodText = 'Tutte le vendite';
       }
-    });
+      doc.text(periodText, 14, 28);
+      doc.text(`Generato il: ${format(new Date(), 'dd/MM/yyyy HH:mm', { locale: it })}`, 14, 34);
 
-    // Totals
-    const finalY = doc.lastAutoTable.finalY + 10;
-    doc.setFontSize(14);
-    doc.setFont(undefined, 'bold');
-    doc.text('Riepilogo Totali', 14, finalY);
+      // Monthly Statistics
+      if (monthlyStats.length > 0) {
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Statistiche Mensili', 14, 45);
 
-    doc.setFontSize(11);
-    doc.setFont(undefined, 'normal');
-    doc.text(`Incasso Totale: €${totals.revenue.toFixed(2)}`, 14, finalY + 8);
-    doc.text(`Costi Totali: €${totals.cost.toFixed(2)}`, 14, finalY + 15);
-    doc.setFont(undefined, 'bold');
-    doc.text(`Profitto Totale: €${totals.profit.toFixed(2)}`, 14, finalY + 22);
+        const monthlyTableData = monthlyStats.map(stat => [
+          stat.month,
+          stat.salesCount.toString(),
+          `€${stat.revenue.toFixed(2)}`,
+          `€${stat.cost.toFixed(2)}`,
+          `€${stat.profit.toFixed(2)}`
+        ]);
 
-    // Save
-    const fileName = `vendite_${filterType}_${format(new Date(), 'yyyy-MM-dd')}.pdf`;
-    doc.save(fileName);
-    toast.success('PDF scaricato con successo!');
+        autoTable(doc, {
+          startY: 50,
+          head: [['Mese', 'N. Vendite', 'Incasso', 'Costi', 'Profitto']],
+          body: monthlyTableData,
+          theme: 'striped',
+          headStyles: { fillColor: [28, 25, 23], textColor: [255, 255, 255] },
+          styles: { fontSize: 9 },
+          columnStyles: {
+            0: { cellWidth: 50 },
+            1: { cellWidth: 25, halign: 'center' },
+            2: { cellWidth: 30, halign: 'right' },
+            3: { cellWidth: 30, halign: 'right' },
+            4: { cellWidth: 30, halign: 'right' }
+          }
+        });
+      }
+
+      // Sales detail table
+      const startY = monthlyStats.length > 0 ? doc.lastAutoTable.finalY + 15 : 45;
+      
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Dettaglio Vendite', 14, startY);
+
+      const tableData = filteredSales.map(sale => {
+        const itemsText = sale.items.map(item => {
+          const product = products.find(p => p.id === item.productId);
+          return `${product?.name || 'Prodotto'} x${item.quantity}`;
+        }).join(', ');
+
+        return [
+          format(new Date(sale.date), 'dd/MM/yyyy', { locale: it }),
+          sale.marketName || 'Mercato',
+          itemsText,
+          `€${sale.totalRevenue.toFixed(2)}`,
+          `€${sale.totalCost.toFixed(2)}`,
+          `€${sale.profit.toFixed(2)}`
+        ];
+      });
+
+      autoTable(doc, {
+        startY: startY + 5,
+        head: [['Data', 'Mercato', 'Prodotti', 'Incasso', 'Costi', 'Profitto']],
+        body: tableData,
+        theme: 'striped',
+        headStyles: { fillColor: [28, 25, 23], textColor: [255, 255, 255] },
+        styles: { fontSize: 8 },
+        columnStyles: {
+          0: { cellWidth: 22 },
+          1: { cellWidth: 30 },
+          2: { cellWidth: 60 },
+          3: { cellWidth: 22, halign: 'right' },
+          4: { cellWidth: 22, halign: 'right' },
+          5: { cellWidth: 22, halign: 'right' }
+        }
+      });
+
+      // Totals
+      const finalY = doc.lastAutoTable.finalY + 10;
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Riepilogo Totali', 14, finalY);
+
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Incasso Totale: €${totals.revenue.toFixed(2)}`, 14, finalY + 8);
+      doc.text(`Costi Totali: €${totals.cost.toFixed(2)}`, 14, finalY + 15);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Profitto Totale: €${totals.profit.toFixed(2)}`, 14, finalY + 22);
+
+      // Save
+      const fileName = `vendite_${filterType}_${format(new Date(), 'yyyy-MM-dd')}.pdf`;
+      doc.save(fileName);
+      toast.success('PDF scaricato con successo!');
+    } catch (error) {
+      console.error('Errore generazione PDF:', error);
+      toast.error('Errore nella generazione del PDF: ' + error.message);
+    }
   };
 
   const filteredSales = getFilteredSales();
   const totals = calculateTotals(filteredSales);
+  const monthlyStats = getMonthlyStats(filteredSales);
 
   if (loading) {
     return (
@@ -297,6 +367,44 @@ const HistoryPage = () => {
         </div>
       </div>
 
+      {/* Monthly Statistics */}
+      {monthlyStats.length > 0 && (
+        <div className="bg-white border-2 border-stone-900 rounded-2xl p-6 mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <TrendingUp size={20} className="text-stone-900" />
+            <h2 className="text-xl font-bold text-stone-900">Statistiche Mensili</h2>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full" data-testid="monthly-stats-table">
+              <thead>
+                <tr className="border-b-2 border-stone-900">
+                  <th className="text-left py-3 px-2 font-bold text-sm uppercase tracking-wide text-stone-900">Mese</th>
+                  <th className="text-center py-3 px-2 font-bold text-sm uppercase tracking-wide text-stone-900">Vendite</th>
+                  <th className="text-right py-3 px-2 font-bold text-sm uppercase tracking-wide text-stone-900">Incasso</th>
+                  <th className="text-right py-3 px-2 font-bold text-sm uppercase tracking-wide text-stone-900">Costi</th>
+                  <th className="text-right py-3 px-2 font-bold text-sm uppercase tracking-wide text-stone-900">Profitto</th>
+                </tr>
+              </thead>
+              <tbody>
+                {monthlyStats.map((stat, idx) => (
+                  <tr key={idx} className="border-b border-stone-200">
+                    <td className="py-3 px-2 font-medium text-stone-900">{stat.month}</td>
+                    <td className="py-3 px-2 text-center font-bold text-stone-900">{stat.salesCount}</td>
+                    <td className="py-3 px-2 text-right font-bold text-stone-900">€{stat.revenue.toFixed(2)}</td>
+                    <td className="py-3 px-2 text-right font-bold text-stone-900">€{stat.cost.toFixed(2)}</td>
+                    <td className={`py-3 px-2 text-right font-bold ${
+                      stat.profit >= 0 ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      €{stat.profit.toFixed(2)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       {/* Export button */}
       <button
         data-testid="export-pdf-btn"
@@ -324,6 +432,9 @@ const HistoryPage = () => {
                 <div>
                   <p className="text-sm font-bold uppercase tracking-widest opacity-60 text-stone-700">
                     {format(new Date(sale.date), 'EEEE, dd MMMM yyyy', { locale: it })}
+                  </p>
+                  <p className="text-sm font-medium text-stone-600">
+                    {sale.marketName || 'Mercato'}
                   </p>
                   <p className="text-xs text-stone-500">
                     {format(new Date(sale.timestamp), 'HH:mm', { locale: it })}
