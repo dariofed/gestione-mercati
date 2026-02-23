@@ -1,34 +1,80 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+body {
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #FDFBF7;
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Nunito', sans-serif;
 }
 
-.App-link {
-    color: #61dafb;
+.App {
+  min-height: 100vh;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+/* Neo-brutalist button styles */
+.neo-button {
+  border: 2px solid #1C1917;
+  box-shadow: 4px 4px 0px 0px rgba(28, 25, 23, 1);
+  transition: all 0.15s ease;
+}
+
+.neo-button:active {
+  box-shadow: none;
+  transform: translate(2px, 2px);
+}
+
+.neo-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 5px 5px 0px 0px rgba(28, 25, 23, 1);
+}
+
+.neo-button:active:hover {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+/* Touch-friendly sizing */
+.touch-target {
+  min-height: 48px;
+  min-width: 48px;
+}
+
+/* Receipt-style border */
+.receipt-border {
+  border-left: 2px solid #1C1917;
+  border-right: 2px solid #1C1917;
+  border-top: 2px solid #1C1917;
+  position: relative;
+}
+
+.receipt-border::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  right: 0;
+  height: 10px;
+  background: linear-gradient(
+    135deg,
+    #FDFBF7 25%,
+    transparent 25%,
+    transparent 50%,
+    #FDFBF7 50%,
+    #FDFBF7 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 10px 10px;
+  border-left: 2px solid #1C1917;
+  border-right: 2px solid #1C1917;
 }
