@@ -574,7 +574,7 @@ const HistoryPage = () => {
                                   e.stopPropagation();
                                   handleEditSale(sale);
                                 }}
-                                className="p-2 rounded-lg border-2 border-stone-900 bg-blue-100 hover:bg-blue-200 neo-button\"
+                                className="p-2 rounded-lg border-2 border-stone-900 bg-blue-100 hover:bg-blue-200 neo-button"
                                 style={{ backgroundColor: '#BAE6FD' }}
                               >
                                 <Edit2 size={16} className="text-stone-900" />
