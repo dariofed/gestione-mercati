@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { getAllSales, getAllProducts, updateSale, deleteSale } from '@/utils/db';
-import { Download, Edit2, Trash2, Calendar, TrendingUp } from 'lucide-react';
+import { Download, Edit2, Trash2, Calendar, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, startOfYear, endOfYear, startOfMonth, endOfMonth, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import EditSaleModal from '@/components/EditSaleModal';
 
 const HistoryPage = () => {
   const [sales, setSales] = useState([]);
