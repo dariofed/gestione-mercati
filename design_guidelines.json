@@ -1,0 +1,114 @@
+{
+  "identity": {
+    "persona": "E1: The Anti-AI Designer",
+    "philosophy": "Fusion over Imitation. Emotion First. Content is King.",
+    "anti_patterns": [
+      "No generic 'Bootstrap' cards",
+      "No invisible touch targets (<44px)",
+      "No gradients on essential text",
+      "No pure black (#000000) on pure white (#FFFFFF)"
+    ]
+  },
+  "typography": {
+    "primary_font": "Nunito, sans-serif",
+    "secondary_font": "Inter, sans-serif",
+    "heading_style": "font-extrabold tracking-tight text-slate-900",
+    "body_style": "font-medium text-slate-700 leading-relaxed",
+    "scale": {
+      "h1": "text-4xl md:text-5xl",
+      "h2": "text-3xl",
+      "h3": "text-2xl",
+      "body": "text-base md:text-lg",
+      "caption": "text-sm font-bold uppercase tracking-widest opacity-60"
+    }
+  },
+  "colors": {
+    "palette_name": "Artisan's Ledger (Neo-Pastel)",
+    "background": "#FDFBF7",
+    "foreground": "#1C1917",
+    "primary": "#1C1917",
+    "secondary": "#E7E5E4",
+    "accent_success": "#86EFAC",
+    "accent_danger": "#FDA4AF",
+    "accent_info": "#BAE6FD",
+    "border_color": "#1C1917",
+    "surface_card": "#FFFFFF",
+    "rules": [
+      "Use 2px solid borders (border-2 border-stone-900) on interactive elements for tactile feel",
+      "Pastel backgrounds must have high contrast text (WCAG AA compliant)",
+      "Active states should physically move (translate-y-1) to mimic buttons"
+    ]
+  },
+  "layout": {
+    "grid_system": "Bento Grid Mode B (High Density)",
+    "spacing": "Relaxed (p-4 to p-8 mobile, p-12 desktop)",
+    "mobile_rules": [
+      "Touch targets minimum 48px",
+      "Important actions (Add Sale) within thumb reach (bottom 30% of screen)",
+      "Sticky totals bar at bottom"
+    ]
+  },
+  "components": {
+    "SalesCounter": {
+      "description": "Core interaction component. Big, chunky buttons.",
+      "style": "Flex row, gap-4, buttons w-16 h-16 rounded-xl border-2 border-stone-900 shadow-[4px_4px_0px_0px_rgba(28,25,23,1)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all",
+      "interactions": "Haptic feedback on click (if available)"
+    },
+    "ProductCard": {
+      "description": "Visual representation of item with inline controls",
+      "style": "bg-white border-2 border-stone-900 rounded-2xl p-4 shadow-sm flex flex-col gap-2"
+    },
+    "ReceiptHistory": {
+      "description": "Visual metaphor for sales history",
+      "style": "bg-white border-x-2 border-t-2 border-stone-900 jagged-bottom-edge p-6 font-mono text-sm"
+    }
+  },
+  "tech_stack": {
+    "framework": "React + Vite",
+    "styling": "Tailwind CSS",
+    "icons": "Lucide React (ShoppingBag, Plus, Minus, History, Settings)",
+    "persistence": "idb (IndexedDB wrapper) - CRITICAL for offline",
+    "charts": "Recharts (Simple Bar/Line for yearly totals)",
+    "pdf": "jspdf + jspdf-autotable",
+    "libraries_to_install": [
+      "idb",
+      "jspdf",
+      "jspdf-autotable",
+      "recharts",
+      "lucide-react",
+      "date-fns",
+      "sonner"
+    ]
+  },
+  "assets": {
+    "demo_images": [
+      {
+        "category": "Ceramics",
+        "url": "https://images.unsplash.com/photo-1763824372146-95e9b6d90926?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODF8MHwxfHNlYXJjaHwxfHxoYW5kbWFkZSUyMGNlcmFtaWMlMjBtdWclMjBhcnRpc2FufGVufDB8fHx8MTc3MTg1MzgxM3ww&ixlib=rb-4.1.0&q=85",
+        "alt": "Ceramic Mugs Shelf"
+      },
+      {
+        "category": "Textiles",
+        "url": "https://images.unsplash.com/photo-1583439223381-81306bc9af27?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODd8MHwxfHNlYXJjaHwzfHxoYW5kbWFkZSUyMGtuaXR0ZWQlMjBoYXQlMjBhcnRpc2FufGVufDB8fHx8MTc3MTg1MzgxNHww&ixlib=rb-4.1.0&q=85",
+        "alt": "Knitted Hat"
+      }
+    ]
+  },
+  "instructions_to_main_agent": [
+    "PHASE 1: Setup 'idb' first. Create a 'db.js' utility to handle all offline storage (Stores: products, sales, settings).",
+    "PHASE 2: Build the 'ProductCard' with the 'Neo-Brutalist' shadow styles defined in colors.rules.",
+    "PHASE 3: Implement the Sales Dashboard. It must be instant. Optimistic UI updates.",
+    "PHASE 4: Create the 'Receipt' view for History using the 'ReceiptHistory' style.",
+    "PHASE 5: PDF Export. Map the 'sales' store to a clean table format.",
+    "CRITICAL: Do not use 'alert()'. Use 'sonner' for 'Sale Recorded' toasts.",
+    "CRITICAL: Ensure all buttons have 'min-h-[48px]' for touch accessibility.",
+    "CRITICAL: The 'Done/Fatto' button should be massive and fixed at the bottom or top-right, distinct from product counters."
+  ],
+  "UNIVERSAL_GUIDELINES": [
+    "No gradients on text.",
+    "Use 2px black borders for that 'Pop' comic/artisan feel.",
+    "Every interactive element needs a data-testid.",
+    "Avoid 'Inter' for Headings. Use 'Nunito' or 'Fredoka'.",
+    "Background color should be #FDFBF7 (Warm Paper) not #FFFFFF (Sterile)."
+  ]
+}
