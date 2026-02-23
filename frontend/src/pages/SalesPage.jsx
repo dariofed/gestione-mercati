@@ -209,8 +209,8 @@ const SalesPage = () => {
 
       {/* Date and Market Name */}
       <div className="bg-white border-2 border-stone-900 rounded-2xl p-6 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="flex flex-col">
             <label className="flex items-center gap-2 mb-2">
               <Calendar size={20} className="text-stone-900" />
               <span className="text-lg font-bold text-stone-900">Data Vendita</span>
@@ -223,60 +223,33 @@ const SalesPage = () => {
               className="w-full px-4 py-3 border-2 border-stone-900 rounded-xl text-base font-medium focus:outline-none focus:ring-2 focus:ring-stone-900"
             />
           </div>
-          <div>
+          <div className="flex flex-col">
             <label className="flex items-center gap-2 mb-2">
               <MapPin size={20} className="text-stone-900" />
               <span className="text-lg font-bold text-stone-900">Nome Mercato</span>
             </label>
-            {suggestedMarkets.length > 0 ? (
-              <select
-                data-testid="market-name-select"
-                value={marketName}
-                onChange={(e) => handleMarketNameChange(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-stone-900 rounded-xl text-base font-medium focus:outline-none focus:ring-2 focus:ring-stone-900"
-              >
-                <option value="">Seleziona o scrivi nuovo...</option>
-                {suggestedMarkets.map((name, idx) => (
-                  <option key={idx} value={name}>{name}</option>
-                ))}
-              </select>
-            ) : (
-              <input
-                type="text"
-                data-testid="market-name-input"
-                value={marketName}
-                onChange={(e) => handleMarketNameChange(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-stone-900 rounded-xl text-base font-medium focus:outline-none focus:ring-2 focus:ring-stone-900"
-                placeholder="Es. Mercato Porta Palazzo"
-              />
-            )}
+            <input
+              type="text"
+              data-testid="market-name-input"
+              value={marketName}
+              onChange={(e) => handleMarketNameChange(e.target.value)}
+              list="market-suggestions"
+              className="w-full px-4 py-3 border-2 border-stone-900 rounded-xl text-base font-medium focus:outline-none focus:ring-2 focus:ring-stone-900"
+              placeholder="Es. Mercato Porta Palazzo"
+            />
+            <datalist id="market-suggestions">
+              {suggestedMarkets.map((name, idx) => (
+                <option key={idx} value={name} />
+              ))}
+            </datalist>
             {suggestedMarkets.length > 0 && (
-              <p className="text-xs text-stone-500 mt-1">
-                Mercato già fatto in questa data. Puoi anche scrivere un nome nuovo.
+              <p className="text-xs text-stone-500 mt-2 flex items-center gap-1">
+                <span className="inline-block w-2 h-2 bg-green-500 rounded-full"></span>
+                Mercato già fatto in questa data: {suggestedMarkets.join(', ')}
               </p>
             )}
           </div>
         </div>
-        {suggestedMarkets.length > 0 && (
-          <div className="mt-4">
-            <button
-              onClick={() => handleMarketNameChange('')}
-              className="text-sm text-stone-600 hover:text-stone-900 underline"
-            >
-              Oppure scrivi un nuovo nome mercato
-            </button>
-            {marketName === '' && (
-              <input
-                type="text"
-                data-testid="market-name-input"
-                value={marketName}
-                onChange={(e) => handleMarketNameChange(e.target.value)}
-                className="w-full mt-2 px-4 py-3 border-2 border-stone-900 rounded-xl text-base font-medium focus:outline-none focus:ring-2 focus:ring-stone-900"
-                placeholder="Es. Mercato Nuovo"
-              />
-            )}
-          </div>
-        )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
