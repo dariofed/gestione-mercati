@@ -3,8 +3,14 @@ import { openDB } from 'idb';
 const DB_NAME = 'ArtisanMarketDB';
 const DB_VERSION = 1;
 
+let dbPromise = null;
+
 export const initDB = async () => {
-  return openDB(DB_NAME, DB_VERSION, {
+  if (dbPromise) {
+    return dbPromise;
+  }
+
+  dbPromise = openDB(DB_NAME, DB_VERSION, {
     upgrade(db) {
       // Products store
       if (!db.objectStoreNames.contains('products')) {
@@ -33,6 +39,8 @@ export const initDB = async () => {
       }
     },
   });
+
+  return dbPromise;
 };
 
 // Products operations
