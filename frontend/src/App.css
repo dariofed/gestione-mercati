@@ -45,8 +45,28 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Touch-friendly sizing */
 .touch-target {
-  min-height: 48px;
-  min-width: 48px;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+  
+  h1 {
+    font-size: 1.75rem !important;
+  }
+  
+  h2 {
+    font-size: 1.25rem !important;
+  }
+  
+  .touch-target {
+    min-height: 40px;
+    min-width: 40px;
+  }
 }
 
 /* Receipt-style border */
