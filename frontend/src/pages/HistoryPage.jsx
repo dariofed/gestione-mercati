@@ -302,10 +302,29 @@ const HistoryPage = () => {
       doc.setFont('helvetica', 'bold');
       doc.text(`Profitto Totale: €${totals.profit.toFixed(2)}`, 14, finalY + 22);
 
-      // Save
+      // Save - gestione iOS-friendly
       const fileName = `vendite_${filterType}_${format(new Date(), 'yyyy-MM-dd')}.pdf`;
-      doc.save(fileName);
-      toast.success('PDF scaricato con successo!');
+      
+      // Rileva se è iOS/mobile
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      
+      if (isIOS) {
+        // Su iOS, apri in nuova finestra
+        const pdfBlob = doc.output('blob');
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+        window.open(pdfUrl, '_blank');
+        
+        toast.success('PDF generato!', {
+          description: 'Tocca "Condividi" → "Salva su File" per salvarlo',
+          duration: 5000
+        });
+      } else {
+        // Su desktop, scarica normalmente
+        doc.save(fileName);
+        toast.success('PDF scaricato!', {
+          duration: 2000
+        });
+      }
     } catch (error) {
       console.error('Errore generazione PDF:', error);
       toast.error('Errore nella generazione del PDF: ' + error.message);
