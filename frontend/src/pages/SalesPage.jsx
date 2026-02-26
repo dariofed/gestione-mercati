@@ -220,7 +220,8 @@ const SalesPage = () => {
               data-testid="sale-date-input"
               value={saleDate}
               onChange={(e) => handleDateChange(e.target.value)}
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-stone-900 rounded-xl text-sm sm:text-base font-medium focus:outline-none focus:ring-2 focus:ring-stone-900"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-stone-900 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-stone-900"
+              style={{ fontSize: '16px' }}
             />
           </div>
           <div className="flex flex-col">
