@@ -97,12 +97,12 @@ const SettingsPage = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-4xl md:text-5xl font-extrabold text-stone-900 tracking-tight mb-2">
+    <div className="max-w-6xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-stone-900 tracking-tight mb-2">
           Impostazioni
         </h1>
-        <p className="text-base md:text-lg font-medium text-stone-600">
+        <p className="text-sm sm:text-base md:text-lg font-medium text-stone-600">
           Gestisci i tuoi prodotti e i loro prezzi
         </p>
       </div>
