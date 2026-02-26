@@ -186,7 +186,7 @@ const HistoryPage = () => {
     }
   };
 
-  const exportToPDF = () => {
+  const exportToPDF = async () => {
     const filteredSales = getFilteredSales();
     
     if (filteredSales.length === 0) {
