@@ -309,13 +309,11 @@ const HistoryPage = () => {
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
       
       if (isIOS) {
-        // Su iOS, apri in nuova finestra
-        const pdfBlob = doc.output('blob');
-        const pdfUrl = URL.createObjectURL(pdfBlob);
-        window.open(pdfUrl, '_blank');
+        // Su iOS, usa il metodo nativo di jsPDF per aprire in nuova finestra
+        doc.output('dataurlnewwindow', fileName);
         
-        toast.success('PDF generato!', {
-          description: 'Tocca "Condividi" → "Salva su File" per salvarlo',
+        toast.success('PDF aperto!', {
+          description: 'Usa "Condividi" → "Salva su File" per salvarlo',
           duration: 5000
         });
       } else {
