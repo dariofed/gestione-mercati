@@ -252,34 +252,34 @@ const SalesPage = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
         {products.map(product => (
           <div
             key={product.id}
             data-testid={`product-card-${product.id}`}
-            className="bg-white border-2 border-stone-900 rounded-2xl p-4 shadow-sm"
+            className="bg-white border-2 border-stone-900 rounded-2xl p-3 sm:p-4 shadow-sm"
           >
-            <div className="mb-3">
-              <h3 className="text-xl font-extrabold text-stone-900">{product.name}</h3>
-              <p className="text-sm font-bold uppercase tracking-widest opacity-60 text-stone-700">
+            <div className="mb-2 sm:mb-3">
+              <h3 className="text-lg sm:text-xl font-extrabold text-stone-900">{product.name}</h3>
+              <p className="text-xs sm:text-sm font-bold uppercase tracking-widest opacity-60 text-stone-700">
                 €{product.price.toFixed(2)}
               </p>
             </div>
 
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center justify-between gap-2 sm:gap-3">
               <button
                 data-testid={`decrement-${product.id}`}
                 onClick={() => decrementProduct(product.id)}
-                className="touch-target w-14 h-14 rounded-xl border-2 border-stone-900 neo-button bg-red-100 hover:bg-red-200 flex items-center justify-center"
+                className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl border-2 border-stone-900 neo-button bg-red-100 hover:bg-red-200 flex items-center justify-center"
                 style={{ backgroundColor: '#FDA4AF' }}
               >
-                <Minus size={24} strokeWidth={3} className="text-stone-900" />
+                <Minus size={20} strokeWidth={3} className="text-stone-900" />
               </button>
 
               <div className="flex-1 text-center">
                 <span
                   data-testid={`quantity-${product.id}`}
-                  className="text-3xl font-extrabold text-stone-900"
+                  className="text-2xl sm:text-3xl font-extrabold text-stone-900"
                 >
                   {cart[product.id] || 0}
                 </span>
@@ -288,10 +288,10 @@ const SalesPage = () => {
               <button
                 data-testid={`increment-${product.id}`}
                 onClick={() => incrementProduct(product.id)}
-                className="touch-target w-14 h-14 rounded-xl border-2 border-stone-900 neo-button bg-green-100 hover:bg-green-200 flex items-center justify-center"
+                className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl border-2 border-stone-900 neo-button bg-green-100 hover:bg-green-200 flex items-center justify-center"
                 style={{ backgroundColor: '#86EFAC' }}
               >
-                <Plus size={24} strokeWidth={3} className="text-stone-900" />
+                <Plus size={20} strokeWidth={3} className="text-stone-900" />
               </button>
             </div>
           </div>
