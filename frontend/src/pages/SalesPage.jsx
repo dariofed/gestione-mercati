@@ -139,8 +139,9 @@ const SalesPage = () => {
       localStorage.setItem('lastMarketName', marketName.trim());
       localStorage.setItem('lastSaleDate', saleDate);
       
-      toast.success('Vendita registrata con successo!', {
-        description: `${format(new Date(saleDate), 'dd/MM/yyyy', { locale: it })} | Profitto: €${profit.toFixed(2)}`
+      toast.success('Vendita registrata!', {
+        description: `${format(new Date(saleDate), 'dd/MM/yyyy', { locale: it })} | Profitto: €${profit.toFixed(2)}`,
+        duration: 2000
       });
       
       // Reset solo il carrello e costo mercato, mantieni data e nome
