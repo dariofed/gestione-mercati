@@ -11,7 +11,12 @@ const Navigation = () => {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 bg-white border-b-2 border-stone-900 px-4 py-3">
+    <nav className="sticky top-0 z-50 bg-white border-b-2 border-stone-900 px-4 py-3 pt-safe">
+      <style>{`
+        .pt-safe {
+          padding-top: max(0.75rem, env(safe-area-inset-top));
+        }
+      `}</style>
       <div className="max-w-7xl mx-auto flex justify-center gap-2">
         {navItems.map(({ path, icon: Icon, label }) => {
           const isActive = location.pathname === path;
