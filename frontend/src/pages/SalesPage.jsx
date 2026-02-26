@@ -309,7 +309,8 @@ const SalesPage = () => {
             data-testid="market-cost-input"
             value={marketCost}
             onChange={(e) => setMarketCost(parseFloat(e.target.value) || 0)}
-            className="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-stone-900 rounded-xl text-base sm:text-lg font-bold focus:outline-none focus:ring-2 focus:ring-stone-900"
+            className="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-stone-900 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-stone-900"
+            style={{ fontSize: '16px' }}
             placeholder="0.00"
             step="0.01"
           />
