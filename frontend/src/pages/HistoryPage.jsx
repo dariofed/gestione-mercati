@@ -302,22 +302,39 @@ const HistoryPage = () => {
       doc.setFont('helvetica', 'bold');
       doc.text(`Profitto Totale: €${totals.profit.toFixed(2)}`, 14, finalY + 22);
 
-      // Save - gestione iOS-friendly
+      // Save - gestione iOS-friendly con menu condivisione nativo
       const fileName = `vendite_${filterType}_${format(new Date(), 'yyyy-MM-dd')}.pdf`;
       
       // Rileva se è iOS/mobile
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
       
-      if (isIOS) {
-        // Su iOS, usa il metodo nativo di jsPDF per aprire in nuova finestra
-        doc.output('dataurlnewwindow', fileName);
+      if (isIOS && navigator.share) {
+        // Su iOS, usa il menu condivisione nativo
+        const pdfBlob = doc.output('blob');
+        const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
         
-        toast.success('PDF aperto!', {
-          description: 'Usa "Condividi" → "Salva su File" per salvarlo',
-          duration: 5000
-        });
+        try {
+          await navigator.share({
+            files: [pdfFile],
+            title: 'Report Vendite',
+            text: `Report vendite ${filterType}`
+          });
+          
+          toast.success('PDF condiviso!', {
+            description: 'Salvato o condiviso con successo',
+            duration: 2000
+          });
+        } catch (shareError) {
+          // Se l'utente annulla la condivisione
+          if (shareError.name !== 'AbortError') {
+            console.error('Errore condivisione:', shareError);
+            // Fallback: scarica normalmente
+            doc.save(fileName);
+            toast.info('PDF scaricato', { duration: 2000 });
+          }
+        }
       } else {
-        // Su desktop, scarica normalmente
+        // Su desktop o browser senza share API, scarica normalmente
         doc.save(fileName);
         toast.success('PDF scaricato!', {
           duration: 2000
