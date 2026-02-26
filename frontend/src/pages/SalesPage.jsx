@@ -298,16 +298,16 @@ const SalesPage = () => {
         ))}
       </div>
 
-      <div className="bg-white border-2 border-stone-900 rounded-2xl p-6 mb-6">
+      <div className="bg-white border-2 border-stone-900 rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6">
         <label className="block mb-2">
-          <span className="text-lg font-bold text-stone-900">Costo Mercato (€)</span>
-          <p className="text-sm text-stone-600 mb-2">Costo totale del mercato (affitto banco, trasporto, ecc.)</p>
+          <span className="text-base sm:text-lg font-bold text-stone-900">Costo Mercato (€)</span>
+          <p className="text-xs sm:text-sm text-stone-600 mb-2">Costo totale del mercato (affitto banco, trasporto, ecc.)</p>
           <input
             type="number"
             data-testid="market-cost-input"
             value={marketCost}
             onChange={(e) => setMarketCost(parseFloat(e.target.value) || 0)}
-            className="w-full px-4 py-3 border-2 border-stone-900 rounded-xl text-lg font-bold focus:outline-none focus:ring-2 focus:ring-stone-900"
+            className="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-stone-900 rounded-xl text-base sm:text-lg font-bold focus:outline-none focus:ring-2 focus:ring-stone-900"
             placeholder="0.00"
             step="0.01"
           />
@@ -315,24 +315,24 @@ const SalesPage = () => {
       </div>
 
       {/* Fixed bottom bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-stone-900 p-4 shadow-lg z-50">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-stone-900 p-3 sm:p-4 shadow-lg z-50">
         <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-2 sm:mb-3">
             <div>
-              <p className="text-sm font-bold uppercase tracking-widest opacity-60 text-stone-700">
+              <p className="text-xs sm:text-sm font-bold uppercase tracking-widest opacity-60 text-stone-700">
                 Totale Vendita
               </p>
-              <p data-testid="total-revenue" className="text-2xl font-extrabold text-stone-900">
+              <p data-testid="total-revenue" className="text-xl sm:text-2xl font-extrabold text-stone-900">
                 €{totalRevenue.toFixed(2)}
               </p>
             </div>
             <div className="text-right">
-              <p className="text-sm font-bold uppercase tracking-widest opacity-60 text-stone-700">
+              <p className="text-xs sm:text-sm font-bold uppercase tracking-widest opacity-60 text-stone-700">
                 Profitto
               </p>
               <p
                 data-testid="total-profit"
-                className={`text-2xl font-extrabold ${
+                className={`text-xl sm:text-2xl font-extrabold ${
                   profit >= 0 ? 'text-green-600' : 'text-red-600'
                 }`}
               >
@@ -344,9 +344,9 @@ const SalesPage = () => {
           <button
             data-testid="complete-sale-btn"
             onClick={handleCompleteSale}
-            className="w-full touch-target py-4 bg-stone-900 text-white rounded-xl border-2 border-stone-900 font-extrabold text-lg uppercase tracking-wide neo-button flex items-center justify-center gap-2"
+            className="w-full py-3 sm:py-4 bg-stone-900 text-white rounded-xl border-2 border-stone-900 font-extrabold text-base sm:text-lg uppercase tracking-wide neo-button flex items-center justify-center gap-2"
           >
-            <Check size={24} strokeWidth={3} />
+            <Check size={20} strokeWidth={3} />
             <span>FATTO</span>
           </button>
         </div>
