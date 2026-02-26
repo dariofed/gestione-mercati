@@ -208,25 +208,25 @@ const SalesPage = () => {
       </div>
 
       {/* Date and Market Name */}
-      <div className="bg-white border-2 border-stone-900 rounded-2xl p-6 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="bg-white border-2 border-stone-900 rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           <div className="flex flex-col">
             <label className="flex items-center gap-2 mb-2">
-              <Calendar size={20} className="text-stone-900" />
-              <span className="text-lg font-bold text-stone-900">Data Vendita</span>
+              <Calendar size={18} className="text-stone-900" />
+              <span className="text-base sm:text-lg font-bold text-stone-900">Data Vendita</span>
             </label>
             <input
               type="date"
               data-testid="sale-date-input"
               value={saleDate}
               onChange={(e) => handleDateChange(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-stone-900 rounded-xl text-base font-medium focus:outline-none focus:ring-2 focus:ring-stone-900"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-stone-900 rounded-xl text-sm sm:text-base font-medium focus:outline-none focus:ring-2 focus:ring-stone-900"
             />
           </div>
           <div className="flex flex-col">
             <label className="flex items-center gap-2 mb-2">
-              <MapPin size={20} className="text-stone-900" />
-              <span className="text-lg font-bold text-stone-900">Nome Mercato</span>
+              <MapPin size={18} className="text-stone-900" />
+              <span className="text-base sm:text-lg font-bold text-stone-900">Nome Mercato</span>
             </label>
             <input
               type="text"
@@ -234,7 +234,7 @@ const SalesPage = () => {
               value={marketName}
               onChange={(e) => handleMarketNameChange(e.target.value)}
               list="market-suggestions"
-              className="w-full px-4 py-3 border-2 border-stone-900 rounded-xl text-base font-medium focus:outline-none focus:ring-2 focus:ring-stone-900"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-stone-900 rounded-xl text-sm sm:text-base font-medium focus:outline-none focus:ring-2 focus:ring-stone-900"
               placeholder="Es. Mercato Porta Palazzo"
             />
             <datalist id="market-suggestions">
