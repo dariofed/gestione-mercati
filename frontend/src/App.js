@@ -21,7 +21,7 @@ function App() {
             </Routes>
           </div>
         </BrowserRouter>
-        <Toaster position="top-center" />
+        <Toaster position="bottom-center" duration={2000} />
       </div>
     </DBProvider>
   );
