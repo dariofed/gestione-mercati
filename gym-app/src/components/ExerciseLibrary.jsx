@@ -3,15 +3,23 @@ import { Search } from "lucide-react";
 import { EXERCISES, MUSCLE_GROUPS } from "../data/exercises.js";
 import ExerciseCard from "./ExerciseCard.jsx";
 
+// La ricerca ignora accenti e maiuscole, cosi' "piu" trova "più" e
+// "Panca" trova "panca"; i nomi inglesi stanno nel campo alt.
+const normalize = (s) =>
+  s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "");
+
 export default function ExerciseLibrary({ schedaIds, onToggle }) {
   const [query, setQuery] = useState("");
   const [activeGroup, setActiveGroup] = useState("tutti");
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = normalize(query.trim());
     return EXERCISES.filter((ex) => {
       const matchesGroup = activeGroup === "tutti" || ex.muscleGroup === activeGroup;
-      const matchesQuery = !q || ex.name.toLowerCase().includes(q);
+      const matchesQuery = !q || normalize(`${ex.name} ${ex.alt}`).includes(q);
       return matchesGroup && matchesQuery;
     });
   }, [query, activeGroup]);

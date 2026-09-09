@@ -115,11 +115,7 @@ export default function App() {
       </main>
 
       <div className="h-[calc(4rem+env(safe-area-inset-bottom))]" />
-      <BottomNav
-        tab={tab}
-        onChange={setTab}
-        schedaCount={state.schede.reduce((n, s) => n + s.items.length, 0)}
-      />
+      <BottomNav tab={tab} onChange={setTab} schedaCount={state.schede.length} />
     </div>
   );
 }

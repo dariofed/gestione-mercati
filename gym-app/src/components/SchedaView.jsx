@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { Check, Download, Minus, Pencil, Plus, Trash2 } from "lucide-react";
+import { Check, ChevronRight, Download, Pencil, Trash2 } from "lucide-react";
 import MuscleIcon from "./MuscleIcon.jsx";
 import SchedaTabs from "./SchedaTabs.jsx";
+import ExerciseEditor from "./ExerciseEditor.jsx";
 import { EXERCISES, MUSCLE_GROUPS } from "../data/exercises.js";
 
 export default function SchedaView({
@@ -18,13 +19,20 @@ export default function SchedaView({
   const scheda = schede.find((s) => s.id === activeId);
   const [renaming, setRenaming] = useState(false);
   const [draftName, setDraftName] = useState("");
+  const [editingId, setEditingId] = useState(null);
   const inputRef = useRef(null);
 
   useEffect(() => {
     if (renaming) inputRef.current?.select();
   }, [renaming]);
 
+  useEffect(() => {
+    setEditingId(null);
+  }, [activeId]);
+
   if (!scheda) return null;
+
+  const editingItem = scheda.items.find((i) => i.exerciseId === editingId);
 
   const startRename = () => {
     setDraftName(scheda.name);
@@ -109,54 +117,31 @@ export default function SchedaView({
           const group = MUSCLE_GROUPS.find((g) => g.id === ex.muscleGroup);
 
           return (
-            <div key={item.exerciseId} className="rounded-2xl border border-border bg-surface p-3">
-              <div className="flex items-center gap-3">
-                <div className="h-11 w-11 shrink-0 rounded-lg bg-surface-2 p-1">
-                  <MuscleIcon group={ex.muscleGroup} color={group?.color} className="h-full w-full" />
-                </div>
-                <h3 className="min-w-0 flex-1 truncate text-sm font-semibold text-text">{ex.name}</h3>
-                <button
-                  type="button"
-                  onClick={() => onRemoveItem(ex.id)}
-                  aria-label="Rimuovi esercizio"
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-text-dim active:bg-surface-2"
-                >
-                  <Trash2 size={16} />
-                </button>
+            <button
+              key={item.exerciseId}
+              type="button"
+              onClick={() => setEditingId(item.exerciseId)}
+              className="flex w-full items-center gap-3 rounded-2xl border border-border bg-surface p-3 text-left active:bg-surface-2"
+            >
+              <div className="h-11 w-11 shrink-0 rounded-lg bg-surface-2 p-1">
+                <MuscleIcon group={ex.muscleGroup} color={group?.color} className="h-full w-full" />
               </div>
 
-              <div className="mt-3 grid grid-cols-3 gap-2">
-                <Stepper
-                  label="Serie"
-                  value={item.sets}
-                  step={1}
-                  min={0}
-                  onChange={(v) => onUpdateItem(ex.id, { sets: v })}
-                />
-                <Stepper
-                  label="Rip."
-                  value={item.reps}
-                  step={1}
-                  min={0}
-                  onChange={(v) => onUpdateItem(ex.id, { reps: v })}
-                />
-                <Stepper
-                  label="Peso (kg)"
-                  value={item.weight}
-                  step={2.5}
-                  min={0}
-                  onChange={(v) => onUpdateItem(ex.id, { weight: v })}
-                />
+              <div className="min-w-0 flex-1">
+                <h3 className="truncate text-sm font-semibold text-text">{ex.name}</h3>
+                <p className="mt-0.5 text-xs text-text-dim">
+                  <span className="font-medium text-text">
+                    {item.sets} × {item.reps}
+                  </span>
+                  {item.weight > 0 && ` · ${item.weight} kg`}
+                </p>
+                {item.note?.trim() && (
+                  <p className="mt-1 truncate text-xs italic text-text-dim">{item.note}</p>
+                )}
               </div>
 
-              <input
-                value={item.note ?? ""}
-                onChange={(e) => onUpdateItem(ex.id, { note: e.target.value })}
-                placeholder="Aggiungi una nota..."
-                maxLength={140}
-                className="mt-2 w-full rounded-xl bg-surface-2 px-3 py-2 text-xs text-text placeholder:text-text-dim focus:outline-none focus:ring-1 focus:ring-accent"
-              />
-            </div>
+              <ChevronRight size={18} className="shrink-0 text-text-dim" />
+            </button>
           );
         })
       )}
@@ -169,35 +154,18 @@ export default function SchedaView({
         <Download size={18} />
         Scarica PDF
       </button>
-    </div>
-  );
-}
 
-function Stepper({ label, value, step, min, onChange }) {
-  const clamp = (v) => Math.max(min, Math.round(v * 10) / 10);
-
-  return (
-    <div className="flex flex-col items-center gap-1 rounded-xl bg-surface-2 p-2">
-      <span className="text-[10px] font-medium uppercase tracking-wide text-text-dim">{label}</span>
-      <div className="flex items-center gap-1">
-        <button
-          type="button"
-          onClick={() => onChange(clamp(value - step))}
-          className="flex h-8 w-8 items-center justify-center rounded-full bg-bg text-text active:bg-accent-dim"
-          aria-label={`Diminuisci ${label}`}
-        >
-          <Minus size={14} />
-        </button>
-        <span className="w-10 text-center text-sm font-semibold text-text">{value}</span>
-        <button
-          type="button"
-          onClick={() => onChange(clamp(value + step))}
-          className="flex h-8 w-8 items-center justify-center rounded-full bg-bg text-text active:bg-accent-dim"
-          aria-label={`Aumenta ${label}`}
-        >
-          <Plus size={14} />
-        </button>
-      </div>
+      {editingItem && (
+        <ExerciseEditor
+          item={editingItem}
+          onUpdate={(patch) => onUpdateItem(editingItem.exerciseId, patch)}
+          onRemove={() => {
+            onRemoveItem(editingItem.exerciseId);
+            setEditingId(null);
+          }}
+          onClose={() => setEditingId(null)}
+        />
+      )}
     </div>
   );
 }
