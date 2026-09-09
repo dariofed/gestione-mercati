@@ -18,7 +18,9 @@ export default function SchedaView({ items, onUpdate, onRemove, onClear, onExpor
   return (
     <div className="flex flex-col gap-3 pb-24">
       <div className="flex items-center justify-between">
-        <span className="text-xs text-text-dim">{items.length} esercizi selezionati</span>
+        <span className="text-xs text-text-dim">
+          {items.length === 1 ? "1 esercizio selezionato" : `${items.length} esercizi selezionati`}
+        </span>
         <button type="button" onClick={onClear} className="text-xs font-medium text-text-dim underline">
           Svuota scheda
         </button>
@@ -76,7 +78,7 @@ export default function SchedaView({ items, onUpdate, onRemove, onClear, onExpor
       <button
         type="button"
         onClick={onExport}
-        className="fixed inset-x-4 bottom-20 z-10 mx-auto flex max-w-md items-center justify-center gap-2 rounded-2xl bg-accent py-3.5 text-sm font-semibold text-white shadow-lg shadow-black/40"
+        className="fixed inset-x-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-10 mx-auto flex max-w-md items-center justify-center gap-2 rounded-2xl bg-accent py-3.5 text-sm font-semibold text-white shadow-lg shadow-black/40"
       >
         <Download size={18} />
         Scarica PDF

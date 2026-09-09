@@ -2,7 +2,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { EXERCISES, MUSCLE_GROUPS } from "../data/exercises.js";
 
-export function exportSchedaPdf(items) {
+export async function exportSchedaPdf(items) {
   const doc = new jsPDF();
   const today = new Date().toLocaleDateString("it-IT");
 
@@ -32,5 +32,19 @@ export function exportSchedaPdf(items) {
     headStyles: { fillColor: [255, 90, 31] },
   });
 
-  doc.save(`scheda-${new Date().toISOString().slice(0, 10)}.pdf`);
+  const filename = `scheda-${new Date().toISOString().slice(0, 10)}.pdf`;
+
+  // Su iOS in modalita' standalone il download diretto non apre nulla:
+  // il foglio di condivisione nativo e' l'unico modo per salvare o stampare.
+  const file = new File([doc.output("blob")], filename, { type: "application/pdf" });
+  if (navigator.canShare?.({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: "La mia scheda" });
+      return;
+    } catch (err) {
+      if (err.name === "AbortError") return;
+    }
+  }
+
+  doc.save(filename);
 }

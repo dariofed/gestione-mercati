@@ -39,7 +39,7 @@ export default function App() {
 
   return (
     <div className="mx-auto min-h-full max-w-md bg-bg">
-      <header className="sticky top-0 z-10 border-b border-border bg-bg/95 px-4 py-4 backdrop-blur">
+      <header className="sticky top-0 z-10 border-b border-border bg-bg/95 px-4 pb-4 pt-[calc(1rem+env(safe-area-inset-top))] backdrop-blur">
         <h1 className="text-lg font-bold text-text">
           {tab === "esercizi" ? "Libreria esercizi" : "La mia scheda"}
         </h1>
@@ -59,7 +59,7 @@ export default function App() {
         )}
       </main>
 
-      <div className="h-16" />
+      <div className="h-[calc(4rem+env(safe-area-inset-bottom))]" />
       <BottomNav tab={tab} onChange={setTab} schedaCount={scheda.length} />
     </div>
   );
