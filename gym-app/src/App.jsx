@@ -1,66 +1,125 @@
 import { useEffect, useMemo, useState } from "react";
 import ExerciseLibrary from "./components/ExerciseLibrary.jsx";
 import SchedaView from "./components/SchedaView.jsx";
+import SchedaTabs from "./components/SchedaTabs.jsx";
 import BottomNav from "./components/BottomNav.jsx";
-import { loadScheda, saveScheda } from "./lib/storage.js";
-import { exportSchedaPdf } from "./lib/pdf.js";
+import { createScheda, loadState, saveState } from "./lib/storage.js";
+import { exportSchedePdf } from "./lib/pdf.js";
 
-const DEFAULT_ITEM = { sets: 3, reps: 10, weight: 0 };
+const DEFAULT_ITEM = { sets: 3, reps: 10, weight: 0, note: "" };
+const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 export default function App() {
   const [tab, setTab] = useState("esercizi");
-  const [scheda, setScheda] = useState(() => loadScheda());
+  const [state, setState] = useState(() => loadState());
 
   useEffect(() => {
-    saveScheda(scheda);
-  }, [scheda]);
+    saveState(state);
+  }, [state]);
 
-  const schedaIds = useMemo(() => new Set(scheda.map((i) => i.exerciseId)), [scheda]);
+  const activeScheda = state.schede.find((s) => s.id === state.activeId) ?? state.schede[0];
+
+  const schedaIds = useMemo(
+    () => new Set(activeScheda.items.map((i) => i.exerciseId)),
+    [activeScheda]
+  );
+
+  const updateActive = (fn) => {
+    setState((prev) => ({
+      ...prev,
+      schede: prev.schede.map((s) => (s.id === activeScheda.id ? fn(s) : s)),
+    }));
+  };
 
   const handleToggle = (exerciseId) => {
-    setScheda((prev) =>
-      prev.some((i) => i.exerciseId === exerciseId)
-        ? prev.filter((i) => i.exerciseId !== exerciseId)
-        : [...prev, { exerciseId, ...DEFAULT_ITEM }]
-    );
+    updateActive((s) => ({
+      ...s,
+      items: s.items.some((i) => i.exerciseId === exerciseId)
+        ? s.items.filter((i) => i.exerciseId !== exerciseId)
+        : [...s.items, { exerciseId, ...DEFAULT_ITEM }],
+    }));
   };
 
-  const handleUpdate = (exerciseId, patch) => {
-    setScheda((prev) => prev.map((i) => (i.exerciseId === exerciseId ? { ...i, ...patch } : i)));
+  const handleUpdateItem = (exerciseId, patch) => {
+    updateActive((s) => ({
+      ...s,
+      items: s.items.map((i) => (i.exerciseId === exerciseId ? { ...i, ...patch } : i)),
+    }));
   };
 
-  const handleRemove = (exerciseId) => {
-    setScheda((prev) => prev.filter((i) => i.exerciseId !== exerciseId));
+  const handleRemoveItem = (exerciseId) => {
+    updateActive((s) => ({ ...s, items: s.items.filter((i) => i.exerciseId !== exerciseId) }));
   };
 
-  const handleClear = () => {
-    if (confirm("Svuotare tutta la scheda?")) setScheda([]);
+  const handleCreateScheda = () => {
+    const used = new Set(state.schede.map((s) => s.name));
+    const letter = [...LETTERS].find((l) => !used.has(l)) ?? `${state.schede.length + 1}`;
+    const scheda = createScheda(letter);
+    setState((prev) => ({ schede: [...prev.schede, scheda], activeId: scheda.id }));
+    setTab("scheda");
+  };
+
+  const handleRenameScheda = (id, name) => {
+    setState((prev) => ({
+      ...prev,
+      schede: prev.schede.map((s) => (s.id === id ? { ...s, name } : s)),
+    }));
+  };
+
+  const handleDeleteScheda = (id) => {
+    const scheda = state.schede.find((s) => s.id === id);
+    if (!confirm(`Eliminare la scheda ${scheda?.name}?`)) return;
+    setState((prev) => {
+      const schede = prev.schede.filter((s) => s.id !== id);
+      return { schede, activeId: prev.activeId === id ? schede[0].id : prev.activeId };
+    });
   };
 
   return (
     <div className="mx-auto min-h-full max-w-md bg-bg">
       <header className="sticky top-0 z-10 border-b border-border bg-bg/95 px-4 pb-4 pt-[calc(1rem+env(safe-area-inset-top))] backdrop-blur">
         <h1 className="text-lg font-bold text-text">
-          {tab === "esercizi" ? "Libreria esercizi" : "La mia scheda"}
+          {tab === "esercizi" ? "Libreria esercizi" : "Le mie schede"}
         </h1>
       </header>
 
       <main className="px-4 py-4">
         {tab === "esercizi" ? (
-          <ExerciseLibrary schedaIds={schedaIds} onToggle={handleToggle} />
+          <>
+            <p className="mb-1.5 text-[11px] font-medium uppercase tracking-wide text-text-dim">
+              Aggiungi a
+            </p>
+            <div className="mb-3">
+              <SchedaTabs
+                schede={state.schede}
+                activeId={activeScheda.id}
+                onSelect={(id) => setState((prev) => ({ ...prev, activeId: id }))}
+                onCreate={handleCreateScheda}
+              />
+            </div>
+            <ExerciseLibrary schedaIds={schedaIds} onToggle={handleToggle} />
+          </>
         ) : (
           <SchedaView
-            items={scheda}
-            onUpdate={handleUpdate}
-            onRemove={handleRemove}
-            onClear={handleClear}
-            onExport={() => exportSchedaPdf(scheda)}
+            schede={state.schede}
+            activeId={activeScheda.id}
+            onSelectScheda={(id) => setState((prev) => ({ ...prev, activeId: id }))}
+            onCreateScheda={handleCreateScheda}
+            onRenameScheda={handleRenameScheda}
+            onDeleteScheda={handleDeleteScheda}
+            onUpdateItem={handleUpdateItem}
+            onRemoveItem={handleRemoveItem}
+            onExport={() => exportSchedePdf(state.schede)}
           />
         )}
       </main>
 
       <div className="h-[calc(4rem+env(safe-area-inset-bottom))]" />
-      <BottomNav tab={tab} onChange={setTab} schedaCount={scheda.length} />
+      <BottomNav
+        tab={tab}
+        onChange={setTab}
+        schedaCount={state.schede.reduce((n, s) => n + s.items.length, 0)}
+      />
     </div>
   );
 }

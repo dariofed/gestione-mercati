@@ -4,10 +4,13 @@
 // zona coinvolta dall'esercizio.
 const BASE = "#4a4a52";
 
+// L'ordine e' anche l'ordine di disegno: le anche stanno in fondo per
+// coprire l'attaccatura delle cosce, i trapezi sopra il tronco.
 const PARTS = {
   head: { tag: "circle", cx: 32, cy: 9, r: 7 },
   torsoUpper: { tag: "rect", x: 21, y: 19, width: 22, height: 15, rx: 6 },
   torsoLower: { tag: "rect", x: 23, y: 32, width: 18, height: 12, rx: 5 },
+  traps: { tag: "rect", x: 22, y: 15, width: 20, height: 7, rx: 3 },
   shoulderL: { tag: "circle", cx: 15, cy: 22, r: 5 },
   shoulderR: { tag: "circle", cx: 49, cy: 22, r: 5 },
   upperArmL: { tag: "rect", x: 10, y: 24, width: 8, height: 17, rx: 4 },
@@ -18,6 +21,7 @@ const PARTS = {
   thighR: { tag: "rect", x: 33, y: 45, width: 9, height: 24, rx: 4 },
   calfL: { tag: "rect", x: 22.5, y: 70, width: 8, height: 21, rx: 3.5 },
   calfR: { tag: "rect", x: 33.5, y: 70, width: 8, height: 21, rx: 3.5 },
+  hips: { tag: "rect", x: 22, y: 42, width: 20, height: 10, rx: 4 },
 };
 
 const ALL_PARTS = Object.keys(PARTS);
@@ -25,11 +29,14 @@ const ALL_PARTS = Object.keys(PARTS);
 const HIGHLIGHTS = {
   petto: ["torsoUpper"],
   schiena: ["torsoUpper", "torsoLower"],
-  gambe: ["thighL", "thighR", "calfL", "calfR"],
+  trapezi: ["traps"],
   spalle: ["shoulderL", "shoulderR"],
   bicipiti: ["upperArmL", "upperArmR"],
   tricipiti: ["upperArmL", "upperArmR"],
+  avambracci: ["forearmL", "forearmR"],
   addominali: ["torsoLower"],
+  gambe: ["thighL", "thighR", "calfL", "calfR"],
+  glutei: ["hips"],
 };
 
 function Shape({ part, fill }) {

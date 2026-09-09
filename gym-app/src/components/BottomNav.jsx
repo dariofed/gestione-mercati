@@ -12,7 +12,7 @@ export default function BottomNav({ tab, onChange, schedaCount }) {
         />
         <NavButton
           icon={<ClipboardList size={20} />}
-          label="Scheda"
+          label="Schede"
           active={tab === "scheda"}
           onClick={() => onChange("scheda")}
           badge={schedaCount > 0 ? schedaCount : null}
